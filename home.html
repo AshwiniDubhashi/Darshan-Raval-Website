@@ -1,0 +1,356 @@
+<html>
+<head>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.topnav {
+overflow: Hidden;
+background-color:#48D1CC;
+}
+
+.topnav a {
+text-align:center;
+float: left;
+background:#48D1CC;
+color:#000000;
+padding: 20px 16px;
+text-decoration: none;
+font-size: 17px;
+}
+.topnav a:hover {
+background-color:#1E90FF;
+color: #000000;
+ opacity: .9;
+}
+
+/*.topnav a.active {
+  background-color: #04AA6D;
+  color: white;
+}*/
+h3{
+color:#00008B;
+
+}
+.hero-text {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+}
+
+.bg {
+  /* The image used */
+  
+  /* Full height */
+  /*height: 5%; */
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+/* Cards UI Upgrade */
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    color: #000;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: 0.4s;
+    text-align: center;
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.05);
+    background: #48D1CC;
+    color: white;
+}
+
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background: white;
+    margin: 8% auto;
+    padding: 25px;
+    width: 60%;
+    border-radius: 12px;
+    position: relative;
+    animation: zoomIn 0.4s;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes zoomIn {
+    from {transform: scale(0.7);}
+    to {transform: scale(1);}
+}
+.chatbox {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 250px;
+}
+
+.chatbox input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.chatbox button {
+    width: 100%;
+    margin-top: 5px;
+    padding: 8px;
+    border: none;
+    background: #48D1CC;
+    cursor: pointer;
+}
+</style>
+
+</head>
+<body>
+<div class="bg">
+ <img class="mySlides" src="dr8.jpg" style="width:100%" style="height:00%">
+  <img class="mySlides" src="dr.jpg" style="width:100%" style="height:40%">
+   <img class="mySlides" src="dr3.jpg" style="width:100%" style="height:40%">
+    <img class="mySlides" src="dr4.jpg" style="width:100%" style="height:40%">
+	 <img class="mySlides" src="dr5.jpg" style="width:100%" style="height:40%">
+	  <img class="mySlides" src="dr6.jpg" style="width:100%" style="height:40%">
+<div class="hero-text">
+
+ <h1 style="font-size:50px">WELCOME TO DARSHU'S WORLD</h1>
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcLV1JG-Q28RlVMvJzY0Ganq4bWEer2vg",
+  authDomain: "darshan-44221.firebaseapp.com",
+  projectId: "darshan-44221",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+</script>
+<script>
+  window.showComments = async function () {
+    let list = document.getElementById("commentsList");
+    list.innerHTML = "Loading...";
+
+    const querySnapshot = await getDocs(collection(db, "comments"));
+
+    list.innerHTML = "";
+
+    querySnapshot.forEach((doc) => {
+        list.innerHTML += `<p>💬 ${doc.data().text}</p><hr>`;
+    });
+
+    document.getElementById("commentModal").style.display = "block";
+};
+  window.addComment = async function () {
+    let input = document.getElementById("commentInput");
+    let comment = input.value;
+
+    if (comment.trim() === "") return alert("Write something!");
+
+    await addDoc(collection(db, "comments"), {
+        text: comment,
+        time: new Date()
+    });
+
+    input.value = "";
+    alert("Feedback submitted 💙");
+};
+var myIndex = 0;
+carousel();
+
+function carousel() {
+  var i;
+  var x = document.getElementsByClassName("mySlides");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";  
+  }
+  myIndex++;
+  if (myIndex > x.length) {myIndex = 1}    
+  x[myIndex-1].style.display = "block";  
+  setTimeout(carousel, 2000); // Change image every 2 seconds
+}
+</script>
+<div class="topnav">
+<a href="home.html">About Us</a>
+<a href="song.html">Songs</a>
+</div>
+<div class="container">
+
+    <div class="card" onclick="openModal('Introduction', intro)">
+        <h3>Introduction</h3>
+        <p>Click to explore</p>
+    </div>
+
+    <div class="card" onclick="openModal('Musical Style', mstyle)">
+        <h3>Musical Style</h3>
+        <p>Click to explore</p>
+    </div>
+
+    <div class="card" onclick="openModal('Breakthrough', breakthrough)">
+        <h3>Breakthrough</h3>
+        <p>Click to explore</p>
+    </div>
+
+    <div class="card" onclick="openModal('Fans', fans)">
+        <h3>Fans</h3>
+        <p>Click to explore</p>
+    </div>
+
+    <div class="card" onclick="openModal('Family', family)">
+        <h3>Family</h3>
+        <p>Click to explore</p>
+    </div>
+
+    <div class="card" onclick="openModal('Education', education)">
+        <h3>Education</h3>
+        <p>Click to explore</p>
+    </div>
+
+</div>
+<div class="chatbox">
+    <h3>Fan Feedback 💙</h3>
+    <input type="text" id="commentInput" placeholder="Write your feedback..." />
+    <button onclick="addComment()">Send</button>
+    <button onclick="showComments()">Read Comments</button>
+</div>
+<div id="popupModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+    </div>
+</div>
+<div id="commentModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeComments()">&times;</span>
+        <h2>Fan Comments 💬</h2>
+        <div id="commentsList"></div>
+    </div>
+</div>
+<script>
+
+/* Data */
+const intro = "Darshan Raval is an Indian singer, songwriter, composer, and actor. Born on October 18, 1994 in Ahmedabad. He became famous after India's Raw Star.";
+
+const mstyle = "His music blends pop, romantic, and soft melodies. His songs are emotional and relatable.";
+
+const breakthrough = "His breakthrough came in 2017 with 'Tera Zikr', which became massively popular.";
+
+const fans = "His fans are known as the 'Blue Family'. They are very loyal and supportive.";
+
+const family = "His father Rajendra Raval is a writer and his mother Rajal Raval is a homemaker.";
+
+const education = "He studied at Shree Swaminarayan Gurukul, Ahmedabad.";
+
+/* Functions */
+function openModal(title, text) {
+    document.getElementById("modalTitle").innerText = title;
+    document.getElementById("modalText").innerText = text;
+    document.getElementById("popupModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("popupModal").style.display = "none";
+}
+
+window.onclick = function(event) {
+    let modal = document.getElementById("popupModal");
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+<script>
+// Add comment
+function addComment() {
+    let input = document.getElementById("commentInput");
+    let comment = input.value;
+
+    if (comment.trim() === "") {
+        alert("Write something!");
+        return;
+    }
+
+    let comments = JSON.parse(localStorage.getItem("comments")) || [];
+    comments.push(comment);
+
+    localStorage.setItem("comments", JSON.stringify(comments));
+
+    input.value = "";
+    alert("Feedback submitted 💙");
+}
+
+// Show comments
+function showComments() {
+    let comments = JSON.parse(localStorage.getItem("comments")) || [];
+    let list = document.getElementById("commentsList");
+
+    list.innerHTML = "";
+
+    if (comments.length === 0) {
+        list.innerHTML = "<p>No comments yet 😔</p>";
+    } else {
+        comments.forEach((c, index) => {
+            list.innerHTML += `<p>💬 ${c}</p><hr>`;
+        });
+    }
+
+    document.getElementById("commentModal").style.display = "block";
+}
+
+// Close modal
+function closeComments() {
+    document.getElementById("commentModal").style.display = "none";
+}
+</script>
+</body>
+</html>

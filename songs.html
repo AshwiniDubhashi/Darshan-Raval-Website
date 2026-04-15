@@ -1,0 +1,110 @@
+<html>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.topnav {
+overflow: Hidden;
+background-color:#48D1CC;
+}
+
+.topnav a {
+text-align:center;
+float: left;
+background:#48D1CC;
+color:#000000;
+padding: 20px 16px;
+text-decoration: none;
+font-size: 17px;
+}
+.topnav a:hover {
+background-color:#1E90FF;
+color: #000000;
+ opacity: .9;
+}
+
+/*.topnav a.active {
+  background-color: #04AA6D;
+  color: white;
+}*/
+
+#audioPlayer {
+      display: none; /* Initially hide the audio player */
+    }
+</style>
+<body>
+<div class="topnav">
+<a href="home.html">About Us</a>
+<a href="songs.html">Songs</a>
+</div>
+<h2>All Darshan Songs</h2>
+
+{% for song in songs %}
+
+<h3>{{song[1]}}</h3>
+
+<audio controls>
+<source src="{{url_for('static',filename='songs/'+song[2])}}" type="audio/mpeg">
+</audio>
+
+{% endfor %}
+  
+ 
+  <script>
+    // Function to show the correct audio player when the corresponding text is clicked
+    function toggleAudioPlayer(textId, audioId) {
+      const textElement = document.getElementById(textId);
+      const audioElement = document.getElementById(audioId);
+
+      // Toggle the audio player visibility
+      textElement.addEventListener('click', function() {
+        // Hide all audio players
+        const allAudioPlayers = document.querySelectorAll('.audioPlayer');
+        allAudioPlayers.forEach(function(player) {
+          player.style.display = 'none';
+        });
+
+        // Show the selected audio player
+        audioElement.style.display = 'block';
+      });
+    }
+
+    // Call the function for each text/audio pair
+    toggleAudioPlayer('text1', 'audio1');
+    toggleAudioPlayer('text2', 'audio2');
+    toggleAudioPlayer('text3', 'audio3');
+	toggleAudioPlayer('text4', 'audio4');
+    toggleAudioPlayer('text5', 'audio5');
+    toggleAudioPlayer('text6', 'audio6');
+	toggleAudioPlayer('text7', 'audio7');
+    toggleAudioPlayer('text8', 'audio8');
+    toggleAudioPlayer('text9', 'audio9');
+	toggleAudioPlayer('text10', 'audio10');
+    toggleAudioPlayer('text11', 'audio11');
+    toggleAudioPlayer('text12', 'audio12');
+	toggleAudioPlayer('text13', 'audio13');
+    toggleAudioPlayer('text14', 'audio14');
+    toggleAudioPlayer('text15', 'audio15');
+	toggleAudioPlayer('text16', 'audio16');
+    toggleAudioPlayer('text17', 'audio17');
+    toggleAudioPlayer('text18', 'audio18');
+	toggleAudioPlayer('text19', 'audio19');
+    toggleAudioPlayer('text20', 'audio20');
+    toggleAudioPlayer('text21', 'audio21');
+	toggleAudioPlayer('text22', 'audio22');
+    toggleAudioPlayer('text23', 'audio23');
+    toggleAudioPlayer('text24', 'audio24');
+	toggleAudioPlayer('text25', 'audio25');
+    toggleAudioPlayer('text26', 'audio26');
+    toggleAudioPlayer('text27', 'audio27');
+	toggleAudioPlayer('text28', 'audio28');
+    toggleAudioPlayer('text29', 'audio29');
+    toggleAudioPlayer('text30', 'audio30');
+	toggleAudioPlayer('text31', 'audio31');
+    toggleAudioPlayer('text32', 'audio32');
+    toggleAudioPlayer('text33', 'audio33');
+  </script>
+
+</body>
+</html>

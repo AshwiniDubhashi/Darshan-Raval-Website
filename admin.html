@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — Song Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #eef4fb;
+    --surface: #f7fafd;
+    --card: #ffffff;
+    --border: #c5d9ef;
+    --accent: #2563eb;
+    --accent2: #0ea5e9;
+    --text: #0f1c35;
+    --muted: #6b85a8;
+    --danger: #ef4444;
+    --radius: 12px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: 0.15;
+  }
+
+  /* SETUP BANNER */
+  .setup-banner {
+    background: #fffbeb; border: 2px solid #f59e0b;
+    border-radius: var(--radius); padding: 20px 28px;
+    margin: 24px auto; max-width: 1100px;
+    font-size: 14px; line-height: 1.8;
+  }
+  .setup-banner h3 { font-size: 16px; font-weight: 700; color: #92400e; margin-bottom: 10px; }
+  .setup-banner code { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 4px; padding: 2px 7px; font-family: monospace; font-size: 13px; color: #92400e; }
+  .setup-banner ol { padding-left: 20px; color: #78350f; }
+  .setup-banner li { margin-bottom: 5px; }
+  .setup-banner a { color: var(--accent); font-weight: 600; }
+
+  /* HEADER */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 40px; border-bottom: 1px solid var(--border);
+    background: var(--card); box-shadow: 0 2px 12px rgba(37,99,235,0.07);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px; color: var(--accent); }
+  .logo span { color: var(--text); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .db-status { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 6px; color: var(--muted); }
+  .db-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; transition: background .3s; }
+  .db-status.connected .dot { background: #22c55e; }
+  .db-status.connected { color: #15803d; border-color: #bbf7d0; background: #f0fdf4; }
+  .db-status.error .dot { background: var(--danger); }
+  .db-status.error { color: var(--danger); border-color: #fecaca; background: #fff5f5; }
+  .header-nav a { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; padding: 8px 16px; border: 1px solid var(--border); border-radius: 6px; transition: all .2s; }
+  .header-nav a:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media(max-width:768px) { .container { grid-template-columns: 1fr; } }
+  h2 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; margin-bottom: 24px; color: var(--text); }
+  h2 .dot { color: var(--accent); }
+
+  /* FORM */
+  .form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; box-shadow: 0 4px 20px rgba(37,99,235,0.06); position: relative; overflow: hidden; }
+  .form-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(37,99,235,.06), transparent 70%); pointer-events: none; }
+  .field { margin-bottom: 20px; }
+  label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  input, textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color .2s, box-shadow .2s; resize: vertical; }
+  input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  textarea { min-height: 90px; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .hint a { color: var(--accent); }
+
+  .btn-submit { width: 100%; background: var(--accent); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; border: none; border-radius: 8px; padding: 14px; cursor: pointer; transition: transform .15s, box-shadow .2s, opacity .2s; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(37,99,235,0.30); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; padding: 14px 24px; border-radius: 8px; opacity: 0; transform: translateY(20px); transition: all .3s; pointer-events: none; z-index: 1000; box-shadow: 0 8px 24px rgba(37,99,235,0.25); max-width: 320px; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.err { background: var(--danger); }
+
+  /* SONGS LIST */
+  .list-panel { display: flex; flex-direction: column; }
+  .songs-count { font-size: 12px; color: var(--muted); margin-bottom: 16px; font-weight: 500; }
+  .song-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 12px; animation: slideIn .3s ease; box-shadow: 0 2px 8px rgba(37,99,235,0.04); }
+  @keyframes slideIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+  .song-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--surface); flex-shrink: 0; border: 1px solid var(--border); }
+  .song-info { flex: 1; min-width: 0; }
+  .song-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .song-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .song-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .btn-icon { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--muted); width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; font-size: 14px; }
+  .btn-icon:hover { border-color: var(--danger); color: var(--danger); }
+  .no-songs { text-align: center; color: var(--muted); padding: 48px 0; font-size: 14px; }
+  .no-songs .icon { font-size: 40px; margin-bottom: 12px; }
+  .loading-state { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
+
+  .has-lyrics { display: inline-block; background: rgba(37,99,235,0.1); color: var(--accent); font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+
+  /* DELETE MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(14,30,60,0.45); z-index: 500; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; width: 90%; max-width: 380px; animation: fadeUp .25s ease; box-shadow: 0 20px 60px rgba(37,99,235,0.15); }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .modal h3 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; margin-bottom: 10px; }
+  .modal p { color: var(--muted); font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 12px; }
+  .btn-cancel { flex: 1; padding: 11px; border: 1px solid var(--border); background: transparent; border-radius: 8px; color: var(--text); cursor: pointer; font-size: 14px; font-family: 'DM Sans', sans-serif; transition: border-color .2s; }
+  .btn-cancel:hover { border-color: var(--muted); }
+  .btn-delete { flex: 1; padding: 11px; background: var(--danger); border: none; border-radius: 8px; color: #fff; cursor: pointer; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="setup-banner" id="setupBanner">
+  <h3>⚙️ One-Time Firebase Setup — Follow These Steps</h3>
+  <ol>
+    <li>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → <strong>Create a new project</strong> (it's free).</li>
+    <li>Inside your project → click <strong>Firestore Database</strong> → <strong>Create database</strong> → select <strong>Start in test mode</strong> → click Next → Enable.</li>
+    <li>Click the ⚙️ gear icon → <strong>Project settings</strong> → scroll to <strong>Your apps</strong> → click <strong>&lt;/&gt; Web</strong> → Register the app → copy the <code>firebaseConfig</code> object shown.</li>
+    <li>Open <strong>both</strong> <code>admin.html</code> and <code>index.html</code> in Notepad/VS Code → find the line <code>PASTE YOUR FIREBASE CONFIG HERE</code> → replace the placeholder config with your real one.</li>
+    <li>Save both files. Now songs added here will instantly appear for <strong>every visitor</strong> on any device! 🎉</li>
+  </ol>
+</div>
+
+<header>
+  <div class="logo">Darshan<span>Raval</span> <span style="color:var(--muted);font-size:14px;font-family:'DM Sans';letter-spacing:1px;font-weight:500;">Blue Family</span></div>
+  <div class="header-right">
+    <div class="db-status" id="dbStatus"><span class="dot"></span><span id="dbStatusText">Connecting…</span></div>
+    <div class="header-nav"><a href="song.html" target="_blank">↗ View Site</a></div>
+  </div>
+</header>
+
+<div class="container">
+  <div>
+    <h2>Add New <span class="dot">Song</span></h2>
+    <div class="form-card">
+      <div class="field">
+        <label>Song Title *</label>
+        <input type="text" id="songTitle" placeholder="e.g. Blinding Lights"/>
+      </div>
+      <div class="field">
+        <label>Artist Name *</label>
+        <input type="text" id="songArtist" placeholder="e.g. The Weeknd"/>
+      </div>
+      <div class="field">
+        <label>Release Date</label>
+        <input type="date" id="songDate"/>
+      </div>
+      <div class="field">
+        <label>Cover Image URL</label>
+        <input type="text" id="songCover" placeholder="Paste a direct image URL (https://...)"/>
+        <p class="hint">💡 Upload to <a href="https://imgur.com/upload" target="_blank">Imgur</a> or <a href="https://cloudinary.com" target="_blank">Cloudinary</a> → paste the link here.</p>
+      </div>
+      <div class="field">
+        <label>Audio / Stream Link</label>
+        <input type="text" id="songAudio" placeholder="MP3 URL, YouTube, Spotify, or SoundCloud link"/>
+      </div>
+      <div class="field">
+        <label>Lyrics</label>
+        <textarea id="songLyrics" placeholder="Paste full lyrics here..."></textarea>
+      </div>
+      <div class="field">
+        <label>Description / Notes</label>
+        <textarea id="songDesc" placeholder="Behind the song, notes, etc." style="min-height:70px;"></textarea>
+      </div>
+      <button class="btn-submit" id="submitBtn" onclick="window.addSong()">+ PUBLISH SONG</button>
+    </div>
+  </div>
+
+  <div class="list-panel">
+    <h2>All <span class="dot">Songs</span></h2>
+    <div class="songs-count" id="songsCount">Loading…</div>
+    <div id="songsList"><div class="loading-state">⏳ Connecting to database…</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>Delete Song?</h3>
+    <p>This permanently removes the song for <strong>all visitors</strong> on any device. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="window.closeDeleteModal()">Cancel</button>
+      <button class="btn-delete" onclick="window.confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, deleteDoc, doc,
+    query, orderBy, onSnapshot, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ╔══════════════════════════════════════════════════════╗
+  // ║   PASTE YOUR FIREBASE CONFIG HERE (Step 4 above)    ║
+  // ╚══════════════════════════════════════════════════════╝
+  const firebaseConfig = {
+    apiKey: "AIzaSyBcLV1JG-Q28RlVMvJzY0Ganq4bWEer2vg",
+    authDomain: "darshan-44221.firebaseapp.com",
+    projectId: "darshan-44221",
+    storageBucket: "darshan-44221.firebasestorage.app",
+    messagingSenderId: "118769395771",
+    appId: "1:118769395771:web:b9d13f77e7e706d0b1141e"
+  };
+
+  let db = null;
+  let pendingDeleteId = null;
+
+  function setStatus(state, text) {
+    const el = document.getElementById('dbStatus');
+    el.className = 'db-status ' + state;
+    document.getElementById('dbStatusText').textContent = text;
+  }
+
+  function toast(msg, isErr = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (isErr ? ' err' : '');
+    void t.offsetWidth;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatDate(d) {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  // Init Firebase
+  try {
+    if (firebaseConfig.apiKey === 'YOUR_API_KEY') throw new Error('not_configured');
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    setStatus('connected', 'Live — All visitors see changes');
+    document.getElementById('setupBanner').style.display = 'none';
+    listenToSongs();
+  } catch(e) {
+    setStatus('error', e.message === 'not_configured' ? 'Not Configured' : 'Connection Error');
+    document.getElementById('songsList').innerHTML = `<div class="no-songs"><div class="icon">⚙️</div>Set up Firebase to get started (see yellow banner).</div>`;
+    document.getElementById('songsCount').textContent = '—';
+  }
+
+  function listenToSongs() {
+    const q = query(collection(db, 'songs'), orderBy('addedAt', 'desc'));
+    onSnapshot(q, snap => {
+      const songs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderList(songs);
+    }, err => {
+      setStatus('error', 'DB Error');
+      toast('Firestore error: ' + err.message, true);
+    });
+  }
+
+  function renderList(songs) {
+    document.getElementById('songsCount').textContent = `${songs.length} song${songs.length !== 1 ? 's' : ''} published`;
+    const list = document.getElementById('songsList');
+    if (!songs.length) {
+      list.innerHTML = `<div class="no-songs"><div class="icon">🎵</div>No songs yet. Add your first one!</div>`;
+      return;
+    }
+    list.innerHTML = songs.map(s => `
+      <div class="song-item">
+        <img class="song-thumb" src="${esc(s.cover) || 'https://placehold.co/52x52/eef4fb/6b85a8?text=♪'}"
+          onerror="this.src='https://placehold.co/52x52/eef4fb/6b85a8?text=♪'" alt="${esc(s.title)}"/>
+        <div class="song-info">
+          <div class="song-title">${esc(s.title)}${s.lyrics ? '<span class="has-lyrics">Lyrics</span>' : ''}</div>
+          <div class="song-meta">${esc(s.artist)}${s.date ? ' · ' + formatDate(s.date) : ''}</div>
+        </div>
+        <div class="song-actions">
+          <button class="btn-icon" title="Delete" onclick="window.askDelete('${s.id}')">🗑</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.addSong = async function() {
+    if (!db) { toast('Configure Firebase first!', true); return; }
+    const title = document.getElementById('songTitle').value.trim();
+    const artist = document.getElementById('songArtist').value.trim();
+    if (!title || !artist) { toast('⚠ Title and Artist are required!', true); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Publishing…';
+
+    try {
+      await addDoc(collection(db, 'songs'), {
+        title,
+        artist,
+        date: document.getElementById('songDate').value,
+        cover: document.getElementById('songCover').value.trim(),
+        audio: document.getElementById('songAudio').value.trim(),
+        lyrics: document.getElementById('songLyrics').value.trim(),
+        description: document.getElementById('songDesc').value.trim(),
+        comments: [],
+        addedAt: serverTimestamp()
+      });
+      ['songTitle','songArtist','songDate','songCover','songAudio','songLyrics','songDesc'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      toast('✓ Song published! Visible to all visitors now.');
+    } catch(e) {
+      toast('Error publishing: ' + e.message, true);
+    }
+    btn.disabled = false;
+    btn.innerHTML = '+ PUBLISH SONG';
+  };
+
+  window.askDelete = function(id) {
+    pendingDeleteId = id;
+    document.getElementById('deleteModal').classList.add('open');
+  };
+
+  window.closeDeleteModal = function() {
+    pendingDeleteId = null;
+    document.getElementById('deleteModal').classList.remove('open');
+  };
+
+  window.confirmDelete = async function() {
+    if (!pendingDeleteId || !db) return;
+    try {
+      await deleteDoc(doc(db, 'songs', pendingDeleteId));
+      window.closeDeleteModal();
+      toast('Song removed from all visitors.');
+    } catch(e) {
+      toast('Delete failed: ' + e.message, true);
+      window.closeDeleteModal();
+    }
+  };
+
+  document.getElementById('deleteModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('deleteModal')) window.closeDeleteModal();
+  });
+</script>
+</body>
+</html>
